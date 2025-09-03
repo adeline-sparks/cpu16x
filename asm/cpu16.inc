@@ -32,6 +32,19 @@ dev_rand = 0xfff9
 ;   Read - Sets all bits in screen to zero.
 dev_screen_clear = 0xfff8
 
+; Vsync button Input
+;   Read - Waits for next vsync (256 clock cycles) then reads buttons
+dev_vsync_btn = 0xfff7
+
+; Button constants
+btn_up = (1 << 0)
+btn_down = (1 << 1)
+btn_left = (1 << 2)
+btn_right = (1 << 3)
+btn_space = (1 << 4)
+btn_j = (1 << 5)
+btn_k = (1 << 6)
+
 ; Screen
 ;   Write - Updates 16-bit horizontal strip of pixels.
 ;   Read - Returns 16-bit horizontal strip of pixel.
