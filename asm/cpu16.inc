@@ -398,14 +398,14 @@ rom_memset = 0x8032
 ; Counts the number of bits set in src and puts result in dst.
 #ruledef
 {
-    cnt {dst: Reg} {src: Reg} => asm { mskcnt {dst}, {src}, {src} } 
+    cnt {dst: Reg}, {src: Reg} => asm { mskcnt {dst}, {src}, {src} } 
 }
 
 ; Bitwise not
 ; Inverts all bits in src and puts result in dst.
 #ruledef
 {
-    not {dst: Reg} {src: Reg} => asm { xnor {dst}, {src}, r0 }
+    not {dst: Reg}, {src: Reg} => asm { xnor {dst}, {src}, r0 }
 }
 
 ; Multiply High and Low
