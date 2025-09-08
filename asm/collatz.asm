@@ -1,5 +1,5 @@
 #include "cpu16.inc"
-#addr 0x4100
+#addr 0x41b0
 
 ; r2 - current number
 ; r1 - temporary

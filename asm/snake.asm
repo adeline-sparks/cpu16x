@@ -21,8 +21,8 @@ init:
   lw r0, [dev_screen_clear]
 
   ; Initialize snake_pos_head and snake_pos_tail
-  mov r5, start_snake_len
-  sw r5, [snake_pos_head]
+  mov r1, 2 * (start_snake_len - 1)
+  sw r1, [snake_pos_head]
   sw r0, [snake_pos_tail]
 
   ; Initialize snake_dx and snake_dy (moving right)
@@ -51,26 +51,16 @@ init:
   or r3, r3, r1
   sw r3, [r2]
 
-  ; Advance loop (r5 = start_snake_len)
+  ; Advance loop
   inc r4
-  blt r4, r5, .pos_loop
+  mov r1, start_snake_len
+  blt r4, r1, .pos_loop
 
 .init_food:
   call roll_new_food
-
-  ; Repeat if food is in the starting snake Y
-  lw r1, [food_y]
-  mov r2, start_snake_y
-  beq r1, r2, .init_food
-
-  ; Set pixel at food location
-  call pixel_address
-  lw r3, [r2]
-  or r3, r3, r1
-  sw r3, [r2]
-
   j game_loop
-#addr 0x4128
+
+#addr 0x4120
 game_loop:
 
 .process_input:
@@ -133,7 +123,7 @@ game_loop:
   bgt r2, r3, game_over
 
   ; Advance head position
-  inc r4
+  add r4, r4, 2
   mov r3, snake_pos_mask
   and r4, r4, r3
   sw r4, [snake_pos_head]
@@ -151,12 +141,6 @@ game_loop:
   ; Leave food pixel as part of snake, roll new food pixel
   call roll_new_food
 
-  ; Set pixel at food location
-  call pixel_address
-  lw r3, [r2]
-  or r3, r3, r1
-  sw r3, [r2]
-
   ; Update score
   lw r1, [score]
   inc r1
@@ -171,11 +155,11 @@ game_loop:
 
   ; Check for collision, this is game over
   lw r3, [r2]
-  and r4, r3, r2
-  bnez r3, game_over
+  and r4, r3, r1
+  bnez r4, game_over
 
   ; Set pixel for head
-  or r3, r3, r2
+  or r3, r3, r1
   sw r3, [r2] 
 
 .move_tail:
@@ -192,7 +176,7 @@ game_loop:
   sw r3, [r2]
 
   ; Advance tail position
-  inc r4
+  add r4, r4, 2
   mov r1, snake_pos_mask
   and r4, r4, r1
   sw r4, [snake_pos_tail]
@@ -213,7 +197,7 @@ game_over:
   j init, r7
 
 
-#addr 0x41a0
+#addr 0x4180
 
 ; Inputs
 ;   r1 - X
@@ -246,19 +230,37 @@ pixel_address:
   ret
 
 ; Update food position and render it on the screen
+; stomps all registers
 roll_new_food:
+  ; save return address in r5
+  mov r5, rl
+
+.loop:
   ; Generate food (x, y)
   lw r1, [dev_rand]
   lw r2, [dev_rand]
   mov r3, 0x1f
   and r1, r1, r3
-  and r2, r1, r3
+  and r2, r2, r3
 
   ; Store it 
   sw r1, [food_x]
   sw r2, [food_y]
 
-  ret
+  ; Load screen at pixel
+  call pixel_address
+  lw r3, [r2]
+
+  ; Check if pixel is already set
+  and r4, r3, r1
+  bnez r4, .loop
+  
+  ; Set pixel
+  or r3, r3, r1
+  sw r3, [r2]
+
+  ; Jump to return address
+  jr r5
 
 
 
