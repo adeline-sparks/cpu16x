@@ -11,9 +11,9 @@ food_y = 0x05
 score = 0x06
 
 snake_pos_buf = 0x10
-snake_pos_mask = 0x3f
+snake_pos_mask = 0x7f
 
-start_snake_len = 4
+start_snake_len = 6
 start_snake_x = 4
 start_snake_y = 8
 
@@ -58,11 +58,8 @@ init:
 
 .init_food:
   call roll_new_food
-  j game_loop
 
-#addr 0x4120
 game_loop:
-
 .process_input:
   lw r1, [dev_vsync_btn]
 
@@ -177,8 +174,8 @@ game_loop:
 
   ; Advance tail position
   add r4, r4, 2
-  mov r1, snake_pos_mask
-  and r4, r4, r1
+  mov r3, snake_pos_mask
+  and r4, r4, r3
   sw r4, [snake_pos_tail]
 
   j game_loop, r7
@@ -195,9 +192,6 @@ game_over:
   and r1, r1, r2
   beqz r1, .loop
   j init, r7
-
-
-#addr 0x4180
 
 ; Inputs
 ;   r1 - X
@@ -241,7 +235,11 @@ roll_new_food:
   lw r2, [dev_rand]
   mov r3, 0x1f
   and r1, r1, r3
+  beq r1, r3, .loop
+  beqz r1, .loop
   and r2, r2, r3
+  beq r2, r3, .loop
+  beqz r2, .loop
 
   ; Store it 
   sw r1, [food_x]
